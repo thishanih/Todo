@@ -70,7 +70,7 @@ export function TodoDialog({
   const submitForm = handleSubmit((values) => {
     onSubmit({
       title: values.title.trim(),
-      description: values.description.trim() || undefined,
+      description: values.description.trim(),
     });
   });
 

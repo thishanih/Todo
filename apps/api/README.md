@@ -82,6 +82,10 @@ Run the API test suite from the monorepo root:
 pnpm --filter @repo/api test
 ```
 
+The tests use an isolated, ephemeral MongoDB Memory Server and do not connect
+to your configured application database. The first dependency install downloads
+and caches the MongoDB binary used by the test server.
+
 The Husky pre-commit hook runs this suite along with linting and the build.
 
 ## Rate limiting

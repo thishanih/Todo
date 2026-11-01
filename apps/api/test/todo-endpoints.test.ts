@@ -1,10 +1,13 @@
 import assert from 'node:assert/strict';
-import { after, before, test } from 'node:test';
+import { after, before, beforeEach, test } from 'node:test';
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Todo } from '../src/models/todo.model.js';
 import { listTodosQuerySchema } from '../src/validation/todo.schema.js';
+const mongoServer = await MongoMemoryServer.create();
+const mongoUri = mongoServer.getUri('todo-api-tests');
 process.env.API_KEY = 'todo-api-test-key';
-process.env.MONGODB_URI = 'mongodb://127.0.0.1:27017/todo-api-tests';
+process.env.MONGODB_URI = mongoUri;
 
 const { app } = await import('../src/app.js');
 
@@ -12,6 +15,7 @@ let server: ReturnType<typeof app.listen>;
 let baseUrl: string;
 
 before(async () => {
+  await mongoose.connect(mongoUri);
   server = app.listen(0);
   await new Promise<void>((resolve, reject) => {
     server.once('listening', resolve);
@@ -27,16 +31,25 @@ before(async () => {
 });
 
 after(async () => {
-  await new Promise<void>((resolve, reject) => {
-    server.close((error) => {
-      if (error) {
-        reject(error);
-        return;
-      }
+  try {
+    await new Promise<void>((resolve, reject) => {
+      server.close((error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
 
-      resolve();
+        resolve();
+      });
     });
-  });
+  } finally {
+    await mongoose.disconnect();
+    await mongoServer.stop();
+  }
+});
+
+beforeEach(async () => {
+  await Todo.deleteMany({});
 });
 
 async function request(
@@ -111,6 +124,76 @@ test('TODO list query parses search and boolean status filters', () => {
     },
   );
   assert.equal(listTodosQuerySchema.parse({ status: 'true' }).status, true);
+});
+
+test('TODO endpoints create, read, update, toggle, and delete persisted todos', async () => {
+  const createResponse = await request('/api/todos', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      title: 'Initial title',
+      description: 'Initial description',
+    }),
+  });
+  const createdBody = await createResponse.json();
+  const createdTodo = createdBody.data;
+
+  assert.equal(createResponse.status, 201);
+  assert.equal(createdBody.success, true);
+  assert.equal(createdTodo.title, 'Initial title');
+  assert.equal(createdTodo.description, 'Initial description');
+  assert.equal(createdTodo.done, false);
+
+  const listResponse = await request('/api/todos?search=Initial');
+  const listBody = await listResponse.json();
+  assert.equal(listResponse.status, 200);
+  assert.equal(listBody.data.pagination.totalDocs, 1);
+  assert.equal(listBody.data.todos[0]._id, createdTodo._id);
+
+  const updateResponse = await request(`/api/todos/${createdTodo._id}`, {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      title: 'Updated title',
+      description: 'Updated description',
+    }),
+  });
+  const updatedBody = await updateResponse.json();
+  assert.equal(updateResponse.status, 200);
+  assert.equal(updatedBody.data.title, 'Updated title');
+  assert.equal(updatedBody.data.description, 'Updated description');
+
+  const persistedResponse = await request('/api/todos?search=Updated');
+  const persistedBody = await persistedResponse.json();
+  assert.equal(persistedBody.data.todos[0]._id, createdTodo._id);
+  assert.equal(persistedBody.data.todos[0].description, 'Updated description');
+
+  const toggleResponse = await request(`/api/todos/${createdTodo._id}/done`, {
+    method: 'PATCH',
+  });
+  const toggledBody = await toggleResponse.json();
+  assert.equal(toggleResponse.status, 200);
+  assert.equal(toggledBody.data.done, true);
+
+  const completedResponse = await request('/api/todos?status=true');
+  const completedBody = await completedResponse.json();
+  assert.equal(completedBody.data.todos[0]._id, createdTodo._id);
+
+  const untoggleResponse = await request(`/api/todos/${createdTodo._id}/done`, {
+    method: 'PATCH',
+  });
+  assert.equal((await untoggleResponse.json()).data.done, false);
+
+  const deleteResponse = await request(`/api/todos/${createdTodo._id}`, {
+    method: 'DELETE',
+  });
+  assert.equal(deleteResponse.status, 200);
+  assert.equal(await Todo.countDocuments(), 0);
+
+  const afterDeleteResponse = await request('/api/todos?search=Updated');
+  const afterDeleteBody = await afterDeleteResponse.json();
+  assert.equal(afterDeleteBody.data.pagination.totalDocs, 0);
+  assert.deepEqual(afterDeleteBody.data.todos, []);
 });
 
 test('POST /api/todos rejects a missing title', async () => {

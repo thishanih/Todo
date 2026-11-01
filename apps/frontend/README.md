@@ -113,15 +113,14 @@ src/
 │       └── spinner.tsx
 ├── helpers/
 │   ├── apiClient.ts
-│   └── queryClient.ts
+│   ├── queryClient.ts
+│   └── utils.ts
 ├── hooks/
 │   └── useDebounce.ts
-├── enums/
-│   └── todoStatusFilter.enum.ts
 ├── interfaces/
 │   └── todo.interface.ts
-├── lib/
-│   └── utils.ts
+├── reusable/
+│   └── enums.ts
 ├── services/
 │   └── todo.services.ts
 ├── styles/
@@ -156,7 +155,7 @@ src/
   shadcn/ui components, including reusable pagination controls.
 - `components/FilterSelect.tsx` provides a reusable select for typed filter
   options.
-- `enums/todoStatusFilter.enum.ts` defines the Todo status filter values.
+- `reusable/enums.ts` defines the Todo status filter values.
 - `views/todoView/component/` contains the Todo card and list states.
 - `views/` contains page-level React views and local UI state.
 - `styles/` contains the Tailwind entry stylesheet.
