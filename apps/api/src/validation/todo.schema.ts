@@ -1,14 +1,27 @@
 import { z } from 'zod';
+import {
+  TODO_DESCRIPTION_MAX_LENGTH,
+  TODO_TITLE_MAX_LENGTH,
+  TODO_TITLE_MIN_LENGTH,
+} from '../shared/todo-limits.js';
 
 export const createTodoSchema = z
   .object({
     title: z
       .string({ error: 'Title is required and must be text.' })
       .trim()
-      .min(1, 'Title is required.'),
+      .min(TODO_TITLE_MIN_LENGTH, 'Title is required.')
+      .max(
+        TODO_TITLE_MAX_LENGTH,
+        `Title cannot exceed ${TODO_TITLE_MAX_LENGTH} characters.`,
+      ),
     description: z
       .string({ error: 'Description must be text.' })
       .trim()
+      .max(
+        TODO_DESCRIPTION_MAX_LENGTH,
+        `Description cannot exceed ${TODO_DESCRIPTION_MAX_LENGTH} characters.`,
+      )
       .optional(),
     done: z.boolean({ error: 'Done must be true or false.' }).optional(),
   })
@@ -19,11 +32,19 @@ export const updateTodoSchema = z
     title: z
       .string({ error: 'Title must be text.' })
       .trim()
-      .min(1, 'Title cannot be empty.')
+      .min(TODO_TITLE_MIN_LENGTH, 'Title cannot be empty.')
+      .max(
+        TODO_TITLE_MAX_LENGTH,
+        `Title cannot exceed ${TODO_TITLE_MAX_LENGTH} characters.`,
+      )
       .optional(),
     description: z
       .string({ error: 'Description must be text.' })
       .trim()
+      .max(
+        TODO_DESCRIPTION_MAX_LENGTH,
+        `Description cannot exceed ${TODO_DESCRIPTION_MAX_LENGTH} characters.`,
+      )
       .optional(),
     done: z.boolean({ error: 'Done must be true or false.' }).optional(),
   })
@@ -48,4 +69,13 @@ export const listTodosQuerySchema = z.object({
     .min(1, 'Limit must be at least 1')
     .max(100, 'Limit cannot exceed 100')
     .default(20),
+  search: z
+    .string()
+    .trim()
+    .max(200, 'Search cannot exceed 200 characters.')
+    .optional(),
+  status: z
+    .enum(['true', 'false'], { error: 'Status must be true or false.' })
+    .transform((value) => value === 'true')
+    .optional(),
 });

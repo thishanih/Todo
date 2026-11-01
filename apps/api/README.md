@@ -64,10 +64,15 @@ All TODO routes require the configured `x-api-key` header.
 
 The list endpoint accepts optional `page` and `limit` query parameters
 (defaults: `1` and `20`; maximum limit: `100`) and returns pagination metadata.
+Use `search` (up to 200 characters) to find case-insensitive partial matches in
+titles or descriptions, and `status=true` or `status=false` to filter completed
+or incomplete TODOs.
+For example, `/api/todos?search=report&status=false&page=1&limit=20`.
 Create accepts `{ "title": "Call back", "description": "Optional details" }`.
 Update accepts one or more of `title`, `description`, and `done`. Invalid input
-returns HTTP `400` with a clear message and field-level details; unknown TODO
-IDs return HTTP `404`.
+returns HTTP `400` with a clear message and field-level details. Titles are
+limited to 200 characters and descriptions to 2,000 characters for both create
+and update requests. Unknown TODO IDs return HTTP `404`.
 
 ## Tests
 

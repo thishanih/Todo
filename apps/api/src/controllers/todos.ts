@@ -14,8 +14,8 @@ export async function getTodos(request: Request, response: Response) {
     throw new Error('TODO list query validation middleware was not applied.');
   }
 
-  const { page, limit } = query;
-  const result = await listTodos(page, limit);
+  const { page, limit, search, status } = query;
+  const result = await listTodos(page, limit, search, status);
 
   response.json({
     success: true,

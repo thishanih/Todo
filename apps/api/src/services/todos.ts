@@ -2,11 +2,41 @@ import { StatusCodes as HttpStatusCodes } from 'http-status-codes';
 import { Todo } from '../models/todo.model.js';
 import { HttpError } from '../shared/http-error.js';
 
-export async function listTodos(page: number, limit: number) {
-  const result = await Todo.aggregatePaginate(
-    Todo.aggregate([{ $sort: { createdAt: -1 } }]),
-    { page, limit },
-  );
+export async function listTodos(
+  page: number,
+  limit: number,
+  search?: string,
+  status?: boolean,
+) {
+  const match = {
+    ...(search
+      ? {
+          $or: [
+            {
+              title: {
+                $regex: search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+                $options: 'i',
+              },
+            },
+            {
+              description: {
+                $regex: search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+                $options: 'i',
+              },
+            },
+          ],
+        }
+      : {}),
+    ...(status !== undefined ? { done: status } : {}),
+  };
+  const pipeline = [
+    ...(Object.keys(match).length > 0 ? [{ $match: match }] : []),
+    { $sort: { createdAt: -1 as const } },
+  ];
+  const result = await Todo.aggregatePaginate(Todo.aggregate(pipeline), {
+    page,
+    limit,
+  });
 
   return {
     todos: result.docs,
