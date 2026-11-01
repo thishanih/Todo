@@ -1,23 +1,16 @@
-import { MongoClient } from 'mongodb';
+import mongoose from 'mongoose';
 import { env } from '../config/env.js';
 
-let client: MongoClient | undefined;
-
 export async function connectToDatabase(): Promise<void> {
-  const mongoClient = new MongoClient(env.MONGODB_URI, { maxPoolSize: 100 });
-  await mongoClient.connect();
-  client = mongoClient;
+  await mongoose.connect(env.MONGODB_URI, { maxPoolSize: 100 });
 
-  console.log(
-    `Connected to MongoDB database "${mongoClient.db().databaseName}"`,
-  );
+  console.log(`Connected to MongoDB database "${mongoose.connection.name}"`);
 }
 
 export async function closeDatabase(): Promise<void> {
-  if (!client) {
+  if (mongoose.connection.readyState === 0) {
     return;
   }
 
-  await client.close();
-  client = undefined;
+  await mongoose.disconnect();
 }

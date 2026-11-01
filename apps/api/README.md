@@ -50,6 +50,35 @@ The response has this shape:
 }
 ```
 
+## TODO endpoints
+
+All TODO routes require the configured `x-api-key` header.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/todos` | List TODOs, newest first |
+| `POST` | `/api/todos` | Create a TODO |
+| `PUT` | `/api/todos/:id` | Update a TODO |
+| `PATCH` | `/api/todos/:id/done` | Toggle a TODO's `done` status |
+| `DELETE` | `/api/todos/:id` | Delete a TODO |
+
+The list endpoint accepts optional `page` and `limit` query parameters
+(defaults: `1` and `20`; maximum limit: `100`) and returns pagination metadata.
+Create accepts `{ "title": "Call back", "description": "Optional details" }`.
+Update accepts one or more of `title`, `description`, and `done`. Invalid input
+returns HTTP `400` with a clear message and field-level details; unknown TODO
+IDs return HTTP `404`.
+
+## Tests
+
+Run the API test suite from the monorepo root:
+
+```sh
+pnpm --filter @repo/api test
+```
+
+The Husky pre-commit hook runs this suite along with linting and the build.
+
 ## Rate limiting
 
 Requests to `/api` are limited to 100 per IP address per 15-minute window.
@@ -65,18 +94,27 @@ src/
 ├── config/
 │   └── env.ts
 ├── controllers/
-│   └── health.ts
+│   ├── health.ts
+│   └── todos.ts
 ├── database/
 │   └── mongo.ts
+├── models/
+│   └── todo.model.ts
 ├── middleware/
+│   ├── async-handler.ts
 │   ├── error-handler.ts
 │   ├── not-found.ts
 │   ├── rate-limit.ts
-│   └── require-api-key.ts
+│   ├── require-api-key.ts
+│   └── validate-request.ts
 ├── routes/
-│   └── health.ts
+│   ├── health.ts
+│   └── todos.ts
 ├── services/
-│   └── health.ts
+│   ├── health.ts
+│   └── todos.ts
+├── validation/
+│   └── todo.schema.ts
 ├── shared/
 │   └── http-error.ts
 ├── app.ts
@@ -86,9 +124,10 @@ src/
 - `routes/` maps HTTP paths to controllers.
 - `controllers/` handles request and response behavior.
 - `services/` contains endpoint logic.
-- `middleware/` provides API-key checks and common error handling.
+- `middleware/` provides request validation, async error forwarding, API-key
+  checks, and common error handling.
 - `database/` manages the MongoDB connection.
 - `config/` loads and validates environment settings.
 
-The MongoDB client uses a connection pool with a maximum of 100 connections per
+Mongoose uses a MongoDB connection pool with a maximum of 100 connections per
 server.
