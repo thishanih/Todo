@@ -201,7 +201,7 @@ export default function TodoView() {
             )}
           </div>
 
-          {pagination && (
+          {pagination && pagination.totalDocs > 0 && (
             <div className="mt-5 flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
                 Page{' '}
