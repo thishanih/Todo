@@ -81,8 +81,11 @@ export function TodoDialog({
       }}
       open={isOpen}
     >
-      <DialogContent className="gap-6 rounded-2xl p-6 sm:p-7">
-        <DialogHeader className="space-y-2 text-left">
+      <DialogContent
+        className="gap-6 rounded-2xl p-6 sm:p-7"
+        onPointerDownOutside={(event) => event.preventDefault()}
+      >
+        <DialogHeader className="gap-0 space-y-0 text-left">
           <DialogTitle className="text-xl">
             {todo ? 'Edit todo' : 'Create a todo'}
           </DialogTitle>
@@ -94,6 +97,7 @@ export function TodoDialog({
         </DialogHeader>
         <form
           className="space-y-5"
+          id="todo-form"
           onSubmit={(event) => void submitForm(event)}
         >
           <div className="space-y-2">
@@ -101,6 +105,7 @@ export function TodoDialog({
             <Input
               aria-invalid={Boolean(errors.title)}
               autoFocus
+              className="h-10"
               id="todo-title"
               maxLength={200}
               placeholder="What needs to get done?"
@@ -121,7 +126,7 @@ export function TodoDialog({
             </Label>
             <textarea
               aria-invalid={Boolean(errors.description)}
-              className="flex min-h-28 w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm outline-none transition focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive"
+              className="flex min-h-36 w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm outline-none transition focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive"
               id="todo-description"
               maxLength={2000}
               placeholder="Add a few helpful details..."
@@ -133,24 +138,26 @@ export function TodoDialog({
               </p>
             )}
           </div>
-          <DialogFooter className="pt-1">
-            <Button
-              disabled={isSubmitting}
-              onClick={() => onOpenChange(false)}
-              type="button"
-              variant="outline"
-            >
-              Cancel
-            </Button>
-            <Button disabled={isSubmitting} type="submit">
-              {isSubmitting
-                ? 'Saving...'
-                : todo
-                  ? 'Save changes'
-                  : 'Create todo'}
-            </Button>
-          </DialogFooter>
         </form>
+        <DialogFooter className="-mx-6 -mb-6 flex-row items-center justify-end gap-3 rounded-b-2xl border-t border-border/70 bg-muted/40 px-6 py-4 sm:-mx-7 sm:-mb-7 sm:px-7">
+          <Button
+            disabled={isSubmitting}
+            onClick={() => onOpenChange(false)}
+            type="button"
+            variant="outline"
+            size="lg"
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={isSubmitting}
+            form="todo-form"
+            type="submit"
+            size="lg"
+          >
+            {isSubmitting ? 'Saving...' : todo ? 'Save changes' : 'Create todo'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -5,6 +5,7 @@ import { TodoDialog } from '@/views/todoView/widgets/TodoDialog';
 import { TodoFilters } from '@/views/todoView/widgets/TodoFilters';
 import { TodoListSkeleton } from '@/views/todoView/component/TodoListSkeleton';
 import { Button } from '@/components/ui/button';
+import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { PaginationControls } from '@/components/PaginationControls';
 import { RefreshErrorAlert } from '@/components/RefreshErrorAlert';
 import { TodoEmptyState } from '@/views/todoView/component/TodoEmptyState';
@@ -25,6 +26,7 @@ export default function TodoView() {
   const [page, setPage] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const [todoToDelete, setTodoToDelete] = useState<Todo | null>(null);
 
   // Debounced search input to avoid excessive API calls
   const search = useDebounce(searchInput.trim(), 250);
@@ -90,9 +92,15 @@ export default function TodoView() {
   };
 
   const deleteTodo = (todo: Todo) => {
-    if (window.confirm(`Delete "${todo.title}"? This cannot be undone.`)) {
-      deleteMutation.mutate(todo);
-    }
+    setTodoToDelete(todo);
+  };
+
+  const confirmDeleteTodo = () => {
+    if (!todoToDelete) return;
+
+    deleteMutation.mutate(todoToDelete, {
+      onSuccess: () => setTodoToDelete(null),
+    });
   };
 
   const changeStatus = (nextStatus: TodoStatusFilter) => {
@@ -194,14 +202,32 @@ export default function TodoView() {
           </div>
 
           {pagination && (
-            <PaginationControls
-              className="justify-end"
-              currentPage={currentPage}
-              hasNextPage={pagination.hasNextPage}
-              hasPreviousPage={pagination.hasPrevPage}
-              onPageChange={setPage}
-              totalPages={totalPages}
-            />
+            <div className="mt-5 flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                Page{' '}
+                <span className="font-medium tabular-nums text-foreground">
+                  {currentPage}
+                </span>{' '}
+                of{' '}
+                <span className="font-medium tabular-nums text-foreground">
+                  {totalPages}
+                </span>
+                <span aria-hidden="true" className="mx-2 text-border">
+                  ·
+                </span>
+                {pagination.totalDocs}{' '}
+                {pagination.totalDocs === 1 ? 'task' : 'tasks'}
+              </p>
+
+              <PaginationControls
+                className="mx-0 mt-0 w-full justify-center sm:w-auto sm:justify-end"
+                currentPage={currentPage}
+                hasNextPage={pagination.hasNextPage}
+                hasPreviousPage={pagination.hasPrevPage}
+                onPageChange={setPage}
+                totalPages={totalPages}
+              />
+            </div>
           )}
         </section>
       </section>
@@ -212,6 +238,18 @@ export default function TodoView() {
         onOpenChange={closeTodoDialog}
         onSubmit={submitTodo}
         todo={editingTodo}
+      />
+      <ConfirmationDialog
+        confirmLabel="Delete todo"
+        confirmingLabel="Deleting..."
+        description={`"${todoToDelete?.title ?? ''}" will be permanently deleted. This action cannot be undone.`}
+        isConfirming={deleteMutation.isPending}
+        isOpen={todoToDelete !== null}
+        onConfirm={confirmDeleteTodo}
+        onOpenChange={(open) => {
+          if (!open) setTodoToDelete(null);
+        }}
+        title="Delete this todo?"
       />
     </main>
   );
