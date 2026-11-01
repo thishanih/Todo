@@ -2,8 +2,8 @@
 
 The frontend is a React and TypeScript single-page application built with Vite.
 It lives in the pnpm monorepo as `@repo/frontend` and uses Tailwind CSS v3 for
-styling and Axios for HTTP requests, with React Router DOM available for
-client-side routing.
+styling, React Router DOM for client-side routing, Axios for HTTP requests, and
+TanStack Query for server state.
 
 ## Requirements
 
@@ -61,6 +61,28 @@ Run these from the monorepo root:
 | `pnpm --filter @repo/frontend preview` | Preview the production build             |
 | `pnpm --filter @repo/frontend lint`    | Check frontend formatting                |
 
+## Todo application
+
+The home route provides a searchable and filterable todo list with pagination.
+Users can create and edit todos in a validated dialog, toggle completion, and
+delete items. Requests use the existing API key interceptor and the TodoApp API
+contract:
+
+| Action            | Request                                   |
+| ----------------- | ----------------------------------------- |
+| List and filter   | `GET /todos?page=&limit=&search=&status=` |
+| Create            | `POST /todos`                             |
+| Edit              | `PUT /todos/:id`                          |
+| Toggle completion | `PATCH /todos/:id/done`                   |
+| Delete            | `DELETE /todos/:id`                       |
+
+TanStack Query retries transient list requests and exposes a manual retry
+action. Loading uses a spinner with skeleton cards, mutation results use toast messages, and
+an application error boundary handles unexpected rendering errors. The create
+and edit dialog validates titles (up to 200 characters) and descriptions (up
+to 2,000 characters) with React Hook Form and Yup. Relative timestamps use
+Moment.
+
 ## Tailwind CSS
 
 Tailwind directives are in `src/styles/index.css`; the configuration scans
@@ -74,15 +96,30 @@ its Tailwind configuration.
 src/
 ├── assets/
 ├── components/
+│   ├── AppErrorBoundary.tsx
+│   ├── FilterSelect.tsx
+│   ├── PaginationControls.tsx
+│   ├── RefreshErrorAlert.tsx
+│   ├── SuspenseFallback.tsx
 │   └── ui/
+│       ├── dialog.tsx
 │       ├── button.tsx
 │       ├── checkbox.tsx
 │       ├── input.tsx
 │       ├── label.tsx
 │       ├── native-select.tsx
-│       └── pagination.tsx
+│       ├── pagination.tsx
+│       ├── skeleton.tsx
+│       └── spinner.tsx
 ├── helpers/
-│   └── apiClient.ts
+│   ├── apiClient.ts
+│   └── queryClient.ts
+├── hooks/
+│   └── useDebounce.ts
+├── enums/
+│   └── todoStatusFilter.enum.ts
+├── interfaces/
+│   └── todo.interface.ts
 ├── lib/
 │   └── utils.ts
 ├── services/
@@ -90,13 +127,36 @@ src/
 ├── styles/
 │   └── index.css
 ├── views/
-│   └── TodoView.tsx
+│   ├── NotFoundView.tsx
+│   └── todoView/
+│       ├── component/
+│       │   ├── TodoCard.tsx
+│       │   ├── TodoEmptyState.tsx
+│       │   ├── TodoListSkeleton.tsx
+│       │   └── TodoLoadError.tsx
+│       ├── hooks/
+│       │   └── useTodos.ts
+│       ├── widgets/
+│       │   ├── TodoDialog.tsx
+│       │   └── TodoFilters.tsx
+│       └── TodoView.tsx
 ├── App.tsx
 └── main.tsx
 ```
 
 - `helpers/apiClient.ts` configures the shared Axios client, API-key request
   interceptor, and response error handling.
-- `services/` is intended for API operations.
-- `views/` contains page-level React views.
+- `helpers/queryClient.ts` exports the configured TanStack Query client.
+- `hooks/useDebounce.ts` provides a generic debounced-value hook.
+- `views/todoView/hooks/useTodos.ts` owns the Todo list query and create,
+  update, completion, and delete mutations.
+- `services/todo.services.ts` implements the list, create, update, completion,
+  and delete API calls.
+- `components/` contains shared dialogs, filters, error handling, and
+  shadcn/ui components, including reusable pagination controls.
+- `components/FilterSelect.tsx` provides a reusable select for typed filter
+  options.
+- `enums/todoStatusFilter.enum.ts` defines the Todo status filter values.
+- `views/todoView/component/` contains the Todo card and list states.
+- `views/` contains page-level React views and local UI state.
 - `styles/` contains the Tailwind entry stylesheet.

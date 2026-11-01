@@ -1,6 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { queryClient } from './helpers/queryClient';
 import App from './App';
 import './styles/index.css';
 
@@ -12,8 +15,17 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <App />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3500,
+            className: 'border border-border bg-card text-foreground shadow-lg',
+          }}
+        />
+      </BrowserRouter>
+    </QueryClientProvider>
   </StrictMode>,
 );
