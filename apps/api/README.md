@@ -29,6 +29,16 @@ workspace from the monorepo root with:
 pnpm dev
 ```
 
+## Assumptions and limitations
+
+- MongoDB must be reachable; the API connects to it before accepting requests.
+- API-key authentication is shared and does not provide user accounts or
+  per-user TODO ownership. All authorized callers access the same TODO data.
+- CORS allows all origins by default. Configure `CORS_ORIGIN` with an explicit
+  allowlist when deploying.
+- Rate limits are held in memory per API instance. Use a shared store when
+  running multiple instances.
+
 ## Health endpoint
 
 `GET http://localhost:3000/api/health/` returns the API status. Send the

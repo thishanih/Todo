@@ -83,6 +83,15 @@ and edit dialog validates titles (up to 200 characters) and descriptions (up
 to 2,000 characters) with React Hook Form and Yup. Relative timestamps use
 Moment.
 
+## Assumptions and limitations
+
+- The API must be reachable at `VITE_API_BASE_URL` and connected to MongoDB.
+- The app has no sign-in or per-user TODO lists; callers using the configured
+  API key share the same TODO data.
+- `VITE_API_KEY` is included in browser code and is not secret. Production
+  deployments should authenticate through a server-side proxy or
+  backend-for-frontend.
+
 ## Tailwind CSS
 
 Tailwind directives are in `src/styles/index.css`; the configuration scans
