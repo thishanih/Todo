@@ -11,6 +11,7 @@ function requireEnvironmentVariable(name: string): string {
 }
 
 const port = Number(process.env.PORT ?? 3000);
+const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS ?? 0);
 const corsOrigins = (process.env.CORS_ORIGIN ?? '*')
   .split(',')
   .map((origin) => origin.trim())
@@ -20,9 +21,14 @@ if (!Number.isInteger(port) || port < 1 || port > 65_535) {
   throw new Error('PORT must be an integer between 1 and 65535');
 }
 
+if (!Number.isInteger(trustProxyHops) || trustProxyHops < 0) {
+  throw new Error('TRUST_PROXY_HOPS must be a non-negative integer');
+}
+
 export const env = {
   API_KEY: requireEnvironmentVariable('API_KEY'),
   CORS_ORIGINS: corsOrigins,
   MONGODB_URI: requireEnvironmentVariable('MONGODB_URI'),
   PORT: port,
+  TRUST_PROXY_HOPS: trustProxyHops,
 };

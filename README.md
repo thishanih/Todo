@@ -10,6 +10,8 @@ shared TypeScript configuration.
 ├── .github/
 │   └── workflows/
 │       └── ci.yml
+├── .husky/
+│   └── pre-commit
 ├── apps/
 │   └── api/
 │       ├── src/
@@ -80,3 +82,9 @@ routes return `404`; unexpected errors return a generic `500` response.
 - `pnpm lint` — check workspace formatting
 - `pnpm format` — format workspace files
 - `pnpm format:check` — verify formatting
+
+## Git hooks
+
+Husky configures a pre-commit hook during dependency installation. Before each
+commit, it runs `pnpm lint` to check formatting and `pnpm build` to build the
+workspace.
