@@ -1,2 +1,3 @@
 pnpm lint
+pnpm --filter @repo/api test
 pnpm build
