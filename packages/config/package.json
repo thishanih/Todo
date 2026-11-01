@@ -1,0 +1,8 @@
+{
+  "name": "@repo/config",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    "./tsconfig.node.json": "./tsconfig.node.json"
+  }
+}

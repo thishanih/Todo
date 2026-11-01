@@ -1,0 +1,27 @@
+{
+  "name": "@repo/api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "lint": "prettier --check \"src/**/*.ts\" \"*.json\""
+  },
+  "dependencies": {
+    "@repo/shared": "workspace:*",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "helmet": "^8.3.0",
+    "http-status-codes": "^2.3.0",
+    "mongodb": "^6.19.0"
+  },
+  "devDependencies": {
+    "@repo/config": "workspace:*",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "tsx": "^4.20.3"
+  }
+}
