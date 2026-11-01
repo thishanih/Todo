@@ -101,6 +101,8 @@ src/
 ├── controllers/
 │   ├── health.ts
 │   └── todos.ts
+├── interfaces/
+│   └── todo.interface.ts
 ├── database/
 │   └── mongo.ts
 ├── models/

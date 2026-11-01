@@ -1,4 +1,5 @@
 import { StatusCodes as HttpStatusCodes } from 'http-status-codes';
+import type { TodoInput } from '../interfaces/todo.interface.js';
 import { Todo } from '../models/todo.model.js';
 import { HttpError } from '../shared/http-error.js';
 
@@ -51,22 +52,11 @@ export async function listTodos(
   };
 }
 
-export async function createTodo(input: {
-  title: string;
-  description?: string;
-  done?: boolean;
-}) {
+export async function createTodo(input: TodoInput) {
   return Todo.create(input);
 }
 
-export async function updateTodo(
-  id: string,
-  input: {
-    title?: string;
-    description?: string;
-    done?: boolean;
-  },
-) {
+export async function updateTodo(id: string, input: TodoInput) {
   const todo = await findTodo(id);
   Object.assign(todo, input);
   return todo.save();

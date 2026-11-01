@@ -7,6 +7,7 @@ import {
   updateTodo,
 } from '../services/todos.js';
 
+// Get a list of TODOs with optional filters and pagination
 export async function getTodos(request: Request, response: Response) {
   const query = request.validatedTodoListQuery;
 
@@ -23,6 +24,7 @@ export async function getTodos(request: Request, response: Response) {
   });
 }
 
+// Create a new TODO
 export async function postTodo(request: Request, response: Response) {
   const todo = await createTodo(request.body);
 
@@ -32,6 +34,7 @@ export async function postTodo(request: Request, response: Response) {
   });
 }
 
+// Update an existing TODO by ID
 export async function putTodo(request: Request, response: Response) {
   const todo = await updateTodo(getValidatedTodoId(request), request.body);
 
@@ -41,6 +44,7 @@ export async function putTodo(request: Request, response: Response) {
   });
 }
 
+// Toggle the 'done' status of a TODO by ID
 export async function patchTodoDone(request: Request, response: Response) {
   const todo = await toggleTodoDone(getValidatedTodoId(request));
 
@@ -50,6 +54,7 @@ export async function patchTodoDone(request: Request, response: Response) {
   });
 }
 
+// Delete a TODO by ID
 export async function removeTodo(request: Request, response: Response) {
   await deleteTodo(getValidatedTodoId(request));
 
@@ -59,6 +64,7 @@ export async function removeTodo(request: Request, response: Response) {
   });
 }
 
+// Get the validated TODO ID from the request
 function getValidatedTodoId(request: Request): string {
   const id = request.validatedTodoId;
 
