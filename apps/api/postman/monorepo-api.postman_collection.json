@@ -1,0 +1,148 @@
+{
+  "info": {
+    "_postman_id": "74e071aa-69ef-4dbc-9f7d-03158aacfc64",
+    "name": "Monorepo API",
+    "description": "Health and TODO endpoints for the local API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "apiKey",
+      "value": "replace_with_api_key",
+      "type": "string"
+    },
+    {
+      "key": "todoId",
+      "value": "replace_with_todo_id",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/health/"
+        }
+      }
+    },
+    {
+      "name": "TODOs",
+      "item": [
+        {
+          "name": "Get all TODOs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/todos?page=1&limit=20"
+            }
+          }
+        },
+        {
+          "name": "Create a TODO",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Call back\",\n  \"description\": \"Optional details\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/todos"
+            }
+          }
+        },
+        {
+          "name": "Update a TODO",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated title\",\n  \"description\": \"Updated details\",\n  \"done\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/todos/{{todoId}}"
+            }
+          }
+        },
+        {
+          "name": "Toggle TODO done status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/todos/{{todoId}}/done"
+            }
+          }
+        },
+        {
+          "name": "Delete a TODO",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/todos/{{todoId}}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

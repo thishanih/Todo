@@ -1,7 +1,7 @@
 # Node.js TypeScript Express Monorepo
 
-A pnpm and Turborepo workspace for a Node.js API, shared TypeScript code, and
-shared TypeScript configuration.
+A pnpm and Turborepo workspace for a Node.js API, React frontend, shared
+TypeScript code, and shared TypeScript configuration.
 
 ## Repository structure
 
@@ -10,8 +10,10 @@ shared TypeScript configuration.
 ├── .github/
 │   └── workflows/
 │       └── ci.yml
+├── .husky/
+│   └── pre-commit
 ├── apps/
-│   └── api/
+│   ├── api/
 │       ├── src/
 │       │   ├── config/
 │       │   ├── controllers/
@@ -26,6 +28,21 @@ shared TypeScript configuration.
 │       ├── package.json
 │       ├── README.md
 │       └── tsconfig.json
+│   └── frontend/
+│       ├── public/
+│       │   └── favicon.svg
+│       ├── src/
+│       │   ├── assets/
+│       │   ├── components/
+│       │   ├── helpers/
+│       │   ├── interfaces/
+│       │   ├── layout/
+│       │   ├── views/
+│       │   ├── App.tsx
+│       │   └── main.tsx
+│       ├── .env.example
+│       ├── package.json
+│       └── vite.config.ts
 ├── packages/
 │   ├── config/
 │   │   ├── package.json
@@ -45,7 +62,7 @@ shared TypeScript configuration.
 
 ## Requirements
 
-- Node.js 22+
+- Node.js 22.12+
 - pnpm 11.17.0
 
 ## Getting started
@@ -53,7 +70,8 @@ shared TypeScript configuration.
 ```sh
 pnpm install
 cp apps/api/.env.example apps/api/.env
-# Set the Atlas connection string and a private API key in apps/api/.env.
+# Set the Atlas connection string and private API key in apps/api/.env.
+cp apps/frontend/.env.example apps/frontend/.env
 pnpm dev
 ```
 
@@ -70,6 +88,15 @@ curl -H "x-api-key: $API_KEY" http://localhost:3000/api/health/
 Keep `apps/api/.env` private; it is ignored by Git. Never commit database
 credentials or API keys.
 
+The React frontend runs at `http://localhost:5173` and checks the API health
+endpoint on startup. Set `VITE_API_BASE_URL` and `VITE_API_KEY` in
+`apps/frontend/.env` to connect it to the API. Vite embeds `VITE_*` values in
+browser code, so use this only for local development or a deliberately public,
+restricted key. For local testing, use the same local-only key for `API_KEY`
+and `VITE_API_KEY`. Never put the API's private production key in frontend
+environment variables; production deployments should authenticate through a
+server-side proxy or backend-for-frontend.
+
 The API uses Helmet security headers and a shared JSON error handler. Unknown
 routes return `404`; unexpected errors return a generic `500` response.
 
@@ -80,3 +107,9 @@ routes return `404`; unexpected errors return a generic `500` response.
 - `pnpm lint` — check workspace formatting
 - `pnpm format` — format workspace files
 - `pnpm format:check` — verify formatting
+
+## Git hooks
+
+Husky configures a pre-commit hook during dependency installation. Before each
+commit, it runs `pnpm lint` to check formatting and `pnpm build` to build the
+workspace.

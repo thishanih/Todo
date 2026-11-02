@@ -6,3 +6,6 @@ dist
 !.env.example
 coverage
 .DS_Store
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
